@@ -33,13 +33,11 @@ fn main() {
 }
 
 fn simulate_records(time: u64, record_dist: u64) -> u64 {
-    let mut wins = 0;
-    for t in 0..time {
-        let dist = t * (time - t);
-        if dist > record_dist {
-            wins += 1;
+    (0..time).fold(0, |acc, t| {
+        if t * (time - t) > record_dist {
+            acc + 1
+        } else {
+            acc
         }
-    }
-
-    wins
+    })
 }

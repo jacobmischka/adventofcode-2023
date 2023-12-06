@@ -78,7 +78,6 @@ fn main() {
         working_vals.retain(|&val| {
             if source_start <= val && val < source_start + range_len {
                 next_vals.push(dest_start + (val - source_start));
-                println!("{val} -> {}", dest_start + (val - source_start));
                 return false;
             }
 

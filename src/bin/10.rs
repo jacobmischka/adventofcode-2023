@@ -1,9 +1,9 @@
 use std::{
     collections::{HashMap, HashSet},
     io,
-    num::TryFromIntError,
-    ops,
 };
+
+use adventofcode_2023::grid::*;
 
 fn main() {
     let mut start: Option<Position> = None;
@@ -190,67 +190,5 @@ fn tile_ends(tile: char) -> Result<[Vector; 2], String> {
         '7' => Ok([Vector(-1, 0), Vector(0, 1)]),
         'F' => Ok([Vector(0, 1), Vector(1, 0)]),
         _ => Err(format!("invalid tile: {tile}")),
-    }
-}
-
-#[derive(Debug, Clone)]
-struct Grid(Vec<Vec<char>>);
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-struct Position(usize, usize);
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-struct Vector(isize, isize);
-
-impl Grid {
-    fn get_pos(&self, pos: Position) -> Option<char> {
-        self.0.get(pos.1).and_then(|row| row.get(pos.0)).cloned()
-    }
-}
-
-impl ops::Deref for Grid {
-    type Target = Vec<Vec<char>>;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl ops::Add<Vector> for Position {
-    type Output = Result<Position, TryFromIntError>;
-
-    fn add(self, rhs: Vector) -> Self::Output {
-        let x = usize::try_from(self.0 as isize + rhs.0)?;
-        let y = usize::try_from(self.1 as isize + rhs.1)?;
-        Ok(Position(x, y))
-    }
-}
-
-impl ops::Sub<Vector> for Position {
-    type Output = Result<Position, TryFromIntError>;
-
-    fn sub(self, rhs: Vector) -> Self::Output {
-        let x = usize::try_from(self.0 as isize - rhs.0)?;
-        let y = usize::try_from(self.1 as isize - rhs.1)?;
-        Ok(Position(x, y))
-    }
-}
-
-impl ops::Add<Vector> for Vector {
-    type Output = Vector;
-    fn add(self, rhs: Vector) -> Self::Output {
-        Vector(self.0 + rhs.0, self.1 + rhs.1)
-    }
-}
-
-impl ops::Sub<Vector> for Vector {
-    type Output = Vector;
-    fn sub(self, rhs: Vector) -> Self::Output {
-        Vector(self.0 - rhs.0, self.1 - rhs.1)
-    }
-}
-
-impl Vector {
-    fn manhattan_distance(&self) -> isize {
-        self.0.abs() + self.1.abs()
     }
 }

@@ -17,11 +17,13 @@ impl Grid {
 
 impl Display for Grid {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for row in self.iter() {
+        for (i, row) in self.iter().enumerate() {
             for cell in row.iter() {
                 write!(f, "{}", *cell)?;
             }
-            writeln!(f, "")?;
+            if i != self.len() - 1 {
+                writeln!(f, "")?;
+            }
         }
 
         Ok(())

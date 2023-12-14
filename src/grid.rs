@@ -1,6 +1,6 @@
 use std::{fmt::Display, num::TryFromIntError, ops};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Grid(pub Vec<Vec<char>>);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -13,6 +13,14 @@ impl Grid {
     pub fn get_pos(&self, pos: Position) -> Option<char> {
         self.0.get(pos.1).and_then(|row| row.get(pos.0)).cloned()
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Direction {
+    North,
+    South,
+    East,
+    West,
 }
 
 impl Display for Grid {

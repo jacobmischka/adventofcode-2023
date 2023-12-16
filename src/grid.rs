@@ -6,13 +6,13 @@ pub struct Grid(pub Vec<Vec<char>>);
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Position(pub usize, pub usize);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Vector(pub isize, pub isize);
 
-impl Grid {
-    pub fn get_pos(&self, pos: Position) -> Option<char> {
-        self.0.get(pos.1).and_then(|row| row.get(pos.0)).cloned()
-    }
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Actor {
+    pub pos: Position,
+    pub vector: Vector,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -21,6 +21,51 @@ pub enum Direction {
     South,
     East,
     West,
+}
+
+impl Actor {
+    pub fn do_move(&mut self) -> Result<(), TryFromIntError> {
+        self.pos = (self.pos + self.vector)?;
+
+        Ok(())
+    }
+}
+
+impl Vector {
+    pub fn manhattan_distance(&self) -> isize {
+        self.0.abs() + self.1.abs()
+    }
+
+    pub fn direction(&self) -> Option<Direction> {
+        if self.0 > 0 && self.1 == 0 {
+            Some(Direction::East)
+        } else if self.0 < 0 && self.1 == 0 {
+            Some(Direction::West)
+        } else if self.0 == 0 && self.1 < 0 {
+            Some(Direction::North)
+        } else if self.0 == 0 && self.1 > 0 {
+            Some(Direction::South)
+        } else {
+            None
+        }
+    }
+}
+
+impl Direction {
+    pub fn unit_vector(&self) -> Vector {
+        match self {
+            Direction::North => Vector(0, -1),
+            Direction::South => Vector(0, 1),
+            Direction::East => Vector(1, 0),
+            Direction::West => Vector(-1, 0),
+        }
+    }
+}
+
+impl Grid {
+    pub fn get_pos(&self, pos: Position) -> Option<char> {
+        self.0.get(pos.1).and_then(|row| row.get(pos.0)).cloned()
+    }
 }
 
 impl Display for Grid {
@@ -93,11 +138,5 @@ impl ops::Sub<Vector> for Vector {
     type Output = Vector;
     fn sub(self, rhs: Vector) -> Self::Output {
         Vector(self.0 - rhs.0, self.1 - rhs.1)
-    }
-}
-
-impl Vector {
-    pub fn manhattan_distance(&self) -> isize {
-        self.0.abs() + self.1.abs()
     }
 }

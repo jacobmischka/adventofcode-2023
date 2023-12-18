@@ -1,9 +1,9 @@
 use std::{fmt::Display, num::TryFromIntError, ops};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Grid(pub Vec<Vec<char>>);
+pub struct Grid<T>(pub Vec<Vec<T>>);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Position(pub usize, pub usize);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -15,7 +15,7 @@ pub struct Actor {
     pub vector: Vector,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Direction {
     North,
     South,
@@ -23,11 +23,28 @@ pub enum Direction {
     West,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub enum RelativeDirection {
+    Forward,
+    Backward,
+    Left,
+    Right,
+}
+
 impl Actor {
     pub fn do_move(&mut self) -> Result<(), TryFromIntError> {
         self.pos = (self.pos + self.vector)?;
 
         Ok(())
+    }
+
+    pub fn turn(&mut self, rel_dir: RelativeDirection) {
+        if let Some(dir) = self.vector.direction() {
+            let magnitude = self.vector.manhattan_distance();
+            self.vector = dir.turned(rel_dir).unit_vector() * magnitude;
+        } else {
+            unimplemented!("only cardinal vectors support turning at the moment")
+        }
     }
 }
 
@@ -60,15 +77,39 @@ impl Direction {
             Direction::West => Vector(-1, 0),
         }
     }
-}
 
-impl Grid {
-    pub fn get_pos(&self, pos: Position) -> Option<char> {
-        self.0.get(pos.1).and_then(|row| row.get(pos.0)).cloned()
+    pub fn turned(self, direction: RelativeDirection) -> Self {
+        match direction {
+            RelativeDirection::Forward => self,
+            RelativeDirection::Backward => match self {
+                Direction::North => Direction::South,
+                Direction::South => Direction::North,
+                Direction::East => Direction::West,
+                Direction::West => Direction::East,
+            },
+            RelativeDirection::Left => match self {
+                Direction::North => Direction::West,
+                Direction::South => Direction::East,
+                Direction::East => Direction::North,
+                Direction::West => Direction::South,
+            },
+            RelativeDirection::Right => match self {
+                Direction::North => Direction::East,
+                Direction::South => Direction::West,
+                Direction::East => Direction::South,
+                Direction::West => Direction::North,
+            },
+        }
     }
 }
 
-impl Display for Grid {
+impl<T> Grid<T> {
+    pub fn get_pos(&self, pos: Position) -> Option<&T> {
+        self.0.get(pos.1).and_then(|row| row.get(pos.0))
+    }
+}
+
+impl<T: Display> Display for Grid<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for (i, row) in self.iter().enumerate() {
             for cell in row.iter() {
@@ -83,14 +124,14 @@ impl Display for Grid {
     }
 }
 
-impl ops::Deref for Grid {
-    type Target = Vec<Vec<char>>;
+impl<T> ops::Deref for Grid<T> {
+    type Target = Vec<Vec<T>>;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl ops::DerefMut for Grid {
+impl<T> ops::DerefMut for Grid<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
     }
@@ -138,5 +179,13 @@ impl ops::Sub<Vector> for Vector {
     type Output = Vector;
     fn sub(self, rhs: Vector) -> Self::Output {
         Vector(self.0 - rhs.0, self.1 - rhs.1)
+    }
+}
+
+impl ops::Mul<isize> for Vector {
+    type Output = Vector;
+
+    fn mul(self, rhs: isize) -> Self::Output {
+        Vector(self.0 * rhs, self.1 * rhs)
     }
 }

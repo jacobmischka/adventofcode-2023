@@ -44,7 +44,7 @@ fn main() {
         'outer: for dy in (-1)..=1 {
             for dx in (-1)..=1 {
                 if let Ok(potential_pos) = start + Vector(dx, dy) {
-                    if let Ok(vectors) = tile_ends(grid.get_pos(potential_pos).unwrap()) {
+                    if let Ok(vectors) = tile_ends(*grid.get_pos(potential_pos).unwrap()) {
                         for vector in vectors {
                             if potential_pos + vector == Ok(start) {
                                 pos = Some(potential_pos);
@@ -94,7 +94,7 @@ fn main() {
         for x in 0..grid[y].len() {
             let pos = Position(x, y);
             if pipe_loop.contains_key(&pos) {
-                let tile = grid.get_pos(pos).unwrap();
+                let tile = *grid.get_pos(pos).unwrap();
                 let vs = tile_ends(tile).unwrap();
                 if vs.into_iter().any(|v| v.1 < 0) {
                     inside = !inside;

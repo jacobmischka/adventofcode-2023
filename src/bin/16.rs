@@ -70,7 +70,7 @@ fn main() {
     println!("Part 2: {}", energized);
 }
 
-fn energize_grid(grid: &Grid, beam: Actor) -> usize {
+fn energize_grid(grid: &Grid<char>, beam: Actor) -> usize {
     let mut seen_beams: HashSet<Actor> = HashSet::new();
     let mut energized: HashSet<Position> = HashSet::new();
     let mut beams: Vec<Actor> = vec![beam];

@@ -86,7 +86,7 @@ struct Reflection {
 }
 
 fn get_reflection(
-    pattern: &Grid,
+    pattern: &Grid<char>,
 ) -> Result<(Reflection, (Reflection, HashSet<Position>)), (Reflection, HashSet<Position>)> {
     let mut reflection: Option<Reflection> = None;
     let mut runner_up: Option<(Reflection, HashSet<Position>)> = None;

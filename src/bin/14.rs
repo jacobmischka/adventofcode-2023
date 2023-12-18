@@ -27,7 +27,7 @@ fn main() {
     tilt(&mut grid, Direction::South);
     tilt(&mut grid, Direction::East);
 
-    let mut seen: HashMap<Grid, usize> = HashMap::new();
+    let mut seen: HashMap<Grid<char>, usize> = HashMap::new();
 
     let mut cycles = 1;
     while !seen.contains_key(&grid) && cycles < TOTAL_CYCLES {
@@ -46,7 +46,7 @@ fn main() {
     println!("Part 2: {}", total_load(&grid));
 }
 
-fn total_load(grid: &Grid) -> usize {
+fn total_load(grid: &Grid<char>) -> usize {
     grid.iter().enumerate().fold(0, |acc, (i, row)| {
         acc + ((grid.len() - i)
             * row
@@ -55,14 +55,14 @@ fn total_load(grid: &Grid) -> usize {
     })
 }
 
-fn cycle(grid: &mut Grid) {
+fn cycle(grid: &mut Grid<char>) {
     tilt(grid, Direction::North);
     tilt(grid, Direction::West);
     tilt(grid, Direction::South);
     tilt(grid, Direction::East);
 }
 
-fn tilt(grid: &mut Grid, direction: Direction) {
+fn tilt(grid: &mut Grid<char>, direction: Direction) {
     match direction {
         Direction::North => {
             for y in 0..grid.len() {

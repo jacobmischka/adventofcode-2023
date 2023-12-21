@@ -6,6 +6,9 @@ pub struct Grid<T>(pub Vec<Vec<T>>);
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Position(pub usize, pub usize);
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct SignedPosition(pub isize, pub isize);
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Vector(pub isize, pub isize);
 
@@ -107,6 +110,10 @@ impl<T> Grid<T> {
     pub fn get_pos(&self, pos: Position) -> Option<&T> {
         self.0.get(pos.1).and_then(|row| row.get(pos.0))
     }
+
+    pub fn get_pos_mut(&mut self, pos: Position) -> Option<&mut T> {
+        self.0.get_mut(pos.1).and_then(|row| row.get_mut(pos.0))
+    }
 }
 
 impl<T: Display> Display for Grid<T> {
@@ -165,6 +172,37 @@ impl ops::Sub<Vector> for Position {
         let x = usize::try_from(self.0 as isize - rhs.0)?;
         let y = usize::try_from(self.1 as isize - rhs.1)?;
         Ok(Position(x, y))
+    }
+}
+
+impl ops::Sub<SignedPosition> for SignedPosition {
+    type Output = Vector;
+
+    fn sub(self, rhs: SignedPosition) -> Self::Output {
+        Vector(
+            self.0 as isize - rhs.0 as isize,
+            self.1 as isize - rhs.1 as isize,
+        )
+    }
+}
+
+impl ops::Add<Vector> for SignedPosition {
+    type Output = SignedPosition;
+
+    fn add(self, rhs: Vector) -> Self::Output {
+        let x = self.0 as isize + rhs.0;
+        let y = self.1 as isize + rhs.1;
+        SignedPosition(x, y)
+    }
+}
+
+impl ops::Sub<Vector> for SignedPosition {
+    type Output = SignedPosition;
+
+    fn sub(self, rhs: Vector) -> Self::Output {
+        let x = self.0 as isize - rhs.0;
+        let y = self.1 as isize - rhs.1;
+        SignedPosition(x, y)
     }
 }
 

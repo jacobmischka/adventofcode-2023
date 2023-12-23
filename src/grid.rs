@@ -72,6 +72,15 @@ impl Vector {
 }
 
 impl Direction {
+    pub fn all() -> &'static [Direction; 4] {
+        &[
+            Direction::North,
+            Direction::South,
+            Direction::East,
+            Direction::West,
+        ]
+    }
+
     pub fn unit_vector(&self) -> Vector {
         match self {
             Direction::North => Vector(0, -1),
@@ -107,12 +116,22 @@ impl Direction {
 }
 
 impl<T> Grid<T> {
+    pub fn new(inner: Vec<Vec<T>>) -> Grid<T> {
+        Grid(inner)
+    }
+
     pub fn get_pos(&self, pos: Position) -> Option<&T> {
         self.0.get(pos.1).and_then(|row| row.get(pos.0))
     }
 
     pub fn get_pos_mut(&mut self, pos: Position) -> Option<&mut T> {
         self.0.get_mut(pos.1).and_then(|row| row.get_mut(pos.0))
+    }
+
+    pub fn wrapped_position(&self, signed_pos: SignedPosition) -> Position {
+        let y = (signed_pos.1.rem_euclid(self.len() as isize)) as usize;
+        let x = (signed_pos.0.rem_euclid(self[y].len() as isize)) as usize;
+        Position(x, y)
     }
 }
 
@@ -141,6 +160,12 @@ impl<T> ops::Deref for Grid<T> {
 impl<T> ops::DerefMut for Grid<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
+    }
+}
+
+impl Position {
+    pub fn to_signed(&self) -> SignedPosition {
+        SignedPosition(self.0 as isize, self.1 as isize)
     }
 }
 

@@ -1,4 +1,4 @@
-use std::{io, iter};
+use std::{collections::HashMap, io, iter};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 enum Spring {
@@ -29,6 +29,8 @@ fn main() {
             continue;
         }
 
+        let mut cache = HashMap::new();
+
         let mut unknowns: Vec<usize> = Vec::new();
         let mut pieces = line.split_ascii_whitespace();
         let springs: Vec<Spring> = pieces
@@ -50,23 +52,9 @@ fn main() {
             .map(|s| s.parse().unwrap())
             .collect();
 
-        for n in 0..2usize.pow(unknowns.len() as u32) {
-            let mut m = n;
-            let mut potential_springs = springs.clone();
-            for i in &unknowns {
-                potential_springs[*i] = if m & 1 == 1 {
-                    Spring::Damaged
-                } else {
-                    Spring::Operational
-                };
-                m = m >> 1;
-            }
+        part1 += num_matches(&springs, &unknowns, &sizes, &mut cache);
 
-            if check_springs(&potential_springs, &sizes) {
-                part1 += 1;
-            }
-        }
-
+        let mut cache = HashMap::new();
         let len = ((springs.len() + 1) * 5) - 1;
         let springs: Vec<_> = springs
             .into_iter()
@@ -82,10 +70,33 @@ fn main() {
             .filter_map(|(i, s)| if *s == Spring::Unknown { Some(i) } else { None })
             .collect();
 
-        for n in 0..2u128.pow(unknowns.len() as u32) {
+        part2 += num_matches(&springs, &unknowns, &sizes, &mut cache);
+    }
+
+    println!("Part 1: {part1}");
+    println!("Part 2: {part2}");
+}
+
+fn num_matches<'a>(
+    springs: &'a [Spring],
+    unknowns: &'a [usize],
+    sizes: &'a [u32],
+    cache: &'a mut HashMap<(&'a [Spring], &'a [u32]), u64>,
+) -> u64 {
+    if let Some(cached) = cache.get(&(springs, sizes)) {
+        *cached
+    } else {
+        // let matches = {
+        //     num_matches()
+        // }
+
+        let mut matches = 0;
+
+        for n in 0..2usize.pow(unknowns.len() as u32) {
             let mut m = n;
-            let mut potential_springs = springs.clone();
-            for i in &unknowns {
+            let mut potential_springs = Vec::new();
+            potential_springs.extend_from_slice(springs);
+            for i in unknowns {
                 potential_springs[*i] = if m & 1 == 1 {
                     Spring::Damaged
                 } else {
@@ -94,17 +105,17 @@ fn main() {
                 m = m >> 1;
             }
 
-            if check_springs(&potential_springs, &sizes) {
-                part2 += 1;
+            if check_springs(&potential_springs, sizes) {
+                matches += 1;
             }
         }
-    }
 
-    println!("Part 1: {part1}");
-    println!("Part 2: {part2}");
+        cache.insert((springs, sizes), matches);
+        matches
+    }
 }
 
-fn check_springs(springs: &Vec<Spring>, sizes: &Vec<u32>) -> bool {
+fn check_springs(springs: &[Spring], sizes: &[u32]) -> bool {
     let mut size_i = 0;
 
     let mut damaged_size = 0;

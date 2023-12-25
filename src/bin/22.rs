@@ -1,5 +1,7 @@
 use std::{collections::HashSet, io, str::FromStr};
 
+use adventofcode_2023::Point3D;
+
 fn main() {
     let mut cubes: Vec<Cube> = io::stdin()
         .lines()
@@ -64,8 +66,8 @@ fn fall(cubes: &mut [Cube]) {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-struct Cube(Point, Point);
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+struct Cube(Point3D<i32>, Point3D<i32>);
 
 impl Cube {
     fn is_supporting(&self, other: &Cube) -> bool {
@@ -98,7 +100,7 @@ impl FromStr for Cube {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut pieces = s.split('~').map(Point::from_str);
+        let mut pieces = s.split('~').map(Point3D::from_str);
         let cube = Cube(
             pieces
                 .next()
@@ -113,48 +115,5 @@ impl FromStr for Cube {
         }
 
         Ok(cube)
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-struct Point {
-    x: u32,
-    y: u32,
-    z: u32,
-}
-
-impl Ord for Point {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.z
-            .cmp(&other.z)
-            .then(self.y.cmp(&other.y))
-            .then(self.x.cmp(&other.x))
-    }
-}
-
-impl PartialOrd for Point {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl FromStr for Point {
-    type Err = String;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut pieces = s
-            .split(',')
-            .map(|s| s.parse::<u32>().map_err(|_| format!("invalid point {s}")));
-        Ok(Point {
-            x: pieces
-                .next()
-                .ok_or_else(|| format!("not enough values in point {s}"))??,
-            y: pieces
-                .next()
-                .ok_or_else(|| format!("not enough values in point {s}"))??,
-            z: pieces
-                .next()
-                .ok_or_else(|| format!("not enough values in point {s}"))??,
-        })
     }
 }
